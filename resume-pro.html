@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="blueprint">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume/Pro — Drafting your career</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#0D1B2E;
+    --blueprint:#132446;
+    --blueprint-deep:#0E1C38;
+    --blueprint-line: rgba(120,160,220,0.16);
+    --blueprint-line-strong: rgba(160,190,235,0.30);
+    --paper:#EDEAE0;
+    --paper-2:#F7F5EE;
+    --brass:#C08829;
+    --brass-light:#E0AE5A;
+    --coral:#C1503A;
+    --green:#4C8C5D;
+    --ink-on-paper:#182233;
+    --muted:#8FA3C4;
+    --muted-on-paper:#5C6478;
+    --radius:2px;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+    --font-serif:'Newsreader', serif;
+  }
+  html[data-theme="paper"]{
+    --bg-main: var(--paper);
+    --bg-panel: var(--paper-2);
+    --line: rgba(20,30,50,0.14);
+    --line-strong: rgba(20,30,50,0.30);
+    --text-main: var(--ink-on-paper);
+    --text-muted: var(--muted-on-paper);
+  }
+  html[data-theme="blueprint"]{
+    --bg-main: var(--blueprint);
+    --bg-panel: var(--blueprint-deep);
+    --line: var(--blueprint-line);
+    --line-strong: var(--blueprint-line-strong);
+    --text-main: #EAF0FB;
+    --text-muted: var(--muted);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg-main);color:var(--text-main);font-family:var(--font-body);transition:background .4s ease,color .4s ease;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 36px 36px;
+    opacity:1;
+  }
+  .grid-bg::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(var(--line-strong) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-strong) 1px, transparent 1px);
+    background-size: 180px 180px;
+  }
+
+  #app{position:relative; z-index:1;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 40px; border-bottom:1px solid var(--line-strong);
+    backdrop-filter: blur(6px);
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb, var(--bg-main) 88%, transparent);
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{width:34px;height:34px;flex-shrink:0;}
+  .brand-text{display:flex; flex-direction:column; line-height:1.05;}
+  .brand-text .name{font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:0.02em;}
+  .brand-text .sub{font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; color:var(--brass-light); text-transform:uppercase;}
+
+  .nav-links{display:flex; gap:4px; background:rgba(255,255,255,0.04); border:1px solid var(--line-strong); border-radius:100px; padding:4px;}
+  .nav-links button{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    background:transparent; border:none; color:var(--text-muted); padding:9px 18px; border-radius:100px;
+    cursor:pointer; transition:all .25s ease;
+  }
+  .nav-links button.active{background:var(--brass); color:#1a1000; font-weight:600;}
+  .nav-links button:not(.active):hover{color:var(--text-main);}
+
+  .topbar-right{display:flex; align-items:center; gap:14px;}
+  .theme-toggle{
+    font-family:var(--font-mono); font-size:10px; letter-spacing:0.1em;
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    border:1px solid var(--line-strong); border-radius:100px; padding:6px 12px;
+    background:transparent; color:var(--text-muted);
+  }
+  .theme-toggle:hover{border-color:var(--brass-light); color:var(--text-main);}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--brass);}
+
+  main{max-width:1240px; margin:0 auto; padding:0 40px 100px;}
+  section[hidden]{display:none !important;}
+
+  /* ---------- Shared: blueprint card w/ crop marks ---------- */
+  .sheet{
+    position:relative; background:var(--bg-panel); border:1px solid var(--line-strong);
+    border-radius:var(--radius); padding:28px;
+  }
+  .sheet::before,.sheet::after,.sheet .cm2,.sheet .cm3{content:"";position:absolute;width:12px;height:12px;}
+  .crop{position:relative;}
+  .crop .cm{position:absolute;width:10px;height:10px;border:1.5px solid var(--brass-light);opacity:.8;}
+  .crop .cm.tl{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+  .crop .cm.tr{top:-1px;right:-1px;border-left:none;border-bottom:none;}
+  .crop .cm.bl{bottom:-1px;left:-1px;border-right:none;border-top:none;}
+  .crop .cm.br{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+
+  .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--brass-light); display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .eyebrow .rule{flex:1; height:1px; background:var(--line-strong);}
+
+  /* ---------- Landing ---------- */
+  .hero{display:grid; grid-template-columns:1.05fr 0.95fr; gap:60px; align-items:center; padding:80px 0 60px;}
+  .hero h1{font-family:var(--font-display); font-size:56px; line-height:1.04; font-weight:700; margin:14px 0 20px; letter-spacing:-0.01em;}
+  .hero h1 em{font-style:italic; font-family:var(--font-serif); color:var(--brass-light); font-weight:400;}
+  .hero p.lede{font-size:17px; line-height:1.6; color:var(--text-muted); max-width:480px; margin-bottom:32px;}
+  .hero-ctas{display:flex; gap:14px;}
+  .btn{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    padding:14px 24px; border-radius:2px; cursor:pointer; border:1px solid transparent; transition:all .2s ease;
+  }
+  .btn-primary{background:var(--brass); color:#1a1000; font-weight:600;}
+  .btn-primary:hover{background:var(--brass-light);}
+  .btn-ghost{background:transparent; border:1px solid var(--line-strong); color:var(--text-main);}
+  .btn-ghost:hover{border-color:var(--brass-light); color:var(--brass-light);}
+
+  .stat-row{display:flex; gap:34px; margin-top:44px;}
+  .stat-row .stat .n{font-family:var(--font-display); font-size:26px; font-weight:700; color:var(--brass-light);}
+  .stat-row .stat .l{font-family:var(--font-mono); font-size:10px; letter-spacing:0.1em; color:var(--text-muted); text-transform:uppercase; margin-top:2px;}
+
+  /* Blueprint draft animation */
+  .draft-stage{position:relative; height:460px; display:flex; align-items:center; justify-content:center;}
+  .draft-svg{width:340px; height:440px; overflow:visible;}
+  .draft-line{fill:none; stroke:var(--brass-light); stroke-width:1.4; stroke-dasharray:900; stroke-dashoffset:900; animation:draw 2.6s ease forwards;}
+  .draft-line.d2{animation-delay:.15s;}
+  .draft-line.d3{animation-delay:.3s;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  .dim-label{font-family:var(--font-mono); font-size:9px; fill:var(--brass-light); opacity:0; animation:fadein .6s ease forwards; animation-delay:2.4s;}
+  .dim-label.d2{animation-delay:2.6s;}
+  .dim-label.d3{animation-delay:2.8s;}
+  @keyframes fadein{to{opacity:.85;}}
+  .paper-resolve{
+    position:absolute; width:280px; height:392px; background:var(--paper-2);
+    border-radius:2px; box-shadow:0 30px 60px rgba(0,0,0,0.35);
+    opacity:0; transform:translateY(14px) scale(.98);
+    animation:resolve 1s ease forwards; animation-delay:3s;
+    padding:26px 24px; color:var(--ink-on-paper);
+  }
+  @keyframes resolve{to{opacity:1; transform:translateY(0) scale(1);}}
+  .paper-resolve .pr-name{font-family:var(--font-display); font-weight:700; font-size:18px;}
+  .paper-resolve .pr-title{font-family:var(--font-mono); font-size:9px; letter-spacing:.08em; color:var(--brass); text-transform:uppercase; margin-bottom:16px;}
+  .paper-resolve .pr-block{height:6px; background:rgba(20,30,50,0.12); border-radius:1px; margin-bottom:8px;}
+  .paper-resolve .pr-block.w60{width:60%;}
+  .paper-resolve .pr-block.w80{width:80%;}
+  .paper-resolve .pr-block.w40{width:40%;}
+  .paper-resolve .pr-sec{font-family:var(--font-mono); font-size:8px; letter-spacing:.1em; color:var(--brass); margin:16px 0 8px; text-transform:uppercase;}
+  .ats-badge{
+    position:absolute; top:18px; right:-18px; background:var(--brass); color:#1a1000;
+    font-family:var(--font-mono); font-size:11px; font-weight:700; padding:8px 12px;
+    border-radius:2px; box-shadow:0 8px 20px rgba(0,0,0,.3);
+    opacity:0; animation:fadein .5s ease forwards; animation-delay:3.6s;
+  }
+
+  .feature-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-strong); border:1px solid var(--line-strong); margin-top:20px;}
+  .feature-strip .f{background:var(--bg-main); padding:26px 22px;}
+  .feature-strip .f .k{font-family:var(--font-mono); font-size:11px; color:var(--brass-light);}
+  .feature-strip .f h3{font-family:var(--font-display); font-size:16px; margin:8px 0 6px;}
+  .feature-strip .f p{font-size:13px; color:var(--text-muted); line-height:1.5; margin:0;}
+
+  .role-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:60px;}
+  .role-card{padding:26px; border:1px solid var(--line-strong); position:relative;}
+  .role-card h4{font-family:var(--font-display); font-size:15px; margin:0 0 8px;}
+  .role-card p{font-size:13px; color:var(--text-muted); line-height:1.55; margin:0;}
+  .role-card .tag{font-family:var(--font-mono); font-size:9px; letter-spacing:.1em; color:var(--brass-light); text-transform:uppercase;}
+
+  section-title{display:block;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin:70px 0 20px;}
+  .section-head h2{font-family:var(--font-display); font-size:24px; margin:0;}
+  .section-head .idx{font-family:var(--font-mono); font-size:11px; color:var(--brass-light);}
+
+  /* ---------- Dashboard ---------- */
+  .dash-header{display:flex; justify-content:space-between; align-items:flex-end; padding:44px 0 26px; border-bottom:1px solid var(--line-strong);}
+  .dash-header h1{font-family:var(--font-display); font-size:30px; margin:0 0 6px;}
+  .dash-header p{color:var(--text-muted); margin:0; font-size:14px;}
+
+  .ring-wrap{display:flex; align-items:center; gap:14px;}
+  .ring-wrap .rn{font-family:var(--font-display); font-size:20px; font-weight:700;}
+  .ring-wrap .rl{font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:.08em; text-transform:uppercase;}
+
+  .dash-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px;}
+  .sec-card{padding:22px; cursor:pointer; transition:border-color .2s ease, transform .2s ease;}
+  .sec-card:hover{border-color:var(--brass-light); transform:translateY(-2px);}
+  .sec-card .top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .sec-card h4{font-family:var(--font-display); font-size:16px; margin:10px 0 4px;}
+  .sec-card p{font-size:12.5px; color:var(--text-muted); margin:0;}
+  .sec-card .count{font-family:var(--font-mono); font-size:20px; font-weight:600; color:var(--brass-light);}
+  .sec-card .icon{width:22px;height:22px; color:var(--brass-light);}
+
+  .ats-panel{display:grid; grid-template-columns:1.2fr 1fr; gap:16px; margin-top:16px;}
+  .ats-score-box{display:flex; align-items:center; gap:24px;}
+  .ats-big{font-family:var(--font-display); font-size:56px; font-weight:700; color:var(--brass-light); line-height:1;}
+  .keyword-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+  .kw{font-family:var(--font-mono); font-size:10px; padding:5px 10px; border-radius:100px; letter-spacing:.04em;}
+  .kw.miss{border:1px solid var(--coral); color:var(--coral);}
+  .kw.match{border:1px solid var(--green); color:var(--green);}
+
+  .quick-row{display:flex; gap:12px; margin-top:24px; flex-wrap:wrap;}
+
+  /* ---------- Builder ---------- */
+  .builder-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:30px; align-items:start;}
+  .form-panel .field{margin-bottom:16px;}
+  .form-panel label{display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;}
+  .form-panel input, .form-panel textarea{
+    width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--line-strong); color:var(--text-main);
+    padding:11px 12px; font-family:var(--font-body); font-size:13.5px; border-radius:2px; resize:vertical;
+  }
+  .form-panel input:focus, .form-panel textarea:focus{outline:2px solid var(--brass-light); outline-offset:1px; border-color:transparent;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .ai-btn{
+    display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em;
+    text-transform:uppercase; background:transparent; border:1px solid var(--brass); color:var(--brass-light);
+    padding:8px 14px; border-radius:100px; cursor:pointer; margin-top:8px;
+  }
+  .ai-btn:hover{background:var(--brass); color:#1a1000;}
+  .ai-btn:disabled{opacity:.5; cursor:wait;}
+  .ai-btn svg{width:12px;height:12px;}
+
+  .template-tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .template-tabs button{
+    font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    padding:7px 12px; border:1px solid var(--line-strong); background:transparent; color:var(--text-muted); cursor:pointer; border-radius:2px;
+  }
+  .template-tabs button.active{border-color:var(--brass-light); color:var(--brass-light);}
+
+  .preview-sheet{background:var(--paper-2); color:var(--ink-on-paper); padding:40px; min-height:600px; box-shadow:0 20px 50px rgba(0,0,0,.25); position:sticky; top:100px;}
+  .preview-sheet.tpl-minimal{font-family:var(--font-serif);}
+  .preview-sheet.tpl-ats{font-family:var(--font-mono); font-size:12px;}
+  .pv-name{font-family:var(--font-display); font-size:26px; font-weight:700; margin:0;}
+  .pv-title{font-family:var(--font-mono); font-size:11px; color:var(--brass); text-transform:uppercase; letter-spacing:.06em; margin:4px 0 18px;}
+  .pv-summary{font-size:13.5px; line-height:1.6; color:#333; margin-bottom:20px; min-height:40px;}
+  .pv-sec-title{font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); border-bottom:1px solid rgba(20,30,50,0.15); padding-bottom:4px; margin:18px 0 10px;}
+  .pv-skills{display:flex; flex-wrap:wrap; gap:6px;}
+  .pv-skills span{font-family:var(--font-mono); font-size:10.5px; background:rgba(192,136,41,0.12); padding:4px 9px; border-radius:2px;}
+  .pv-exp-item{margin-bottom:12px;}
+  .pv-exp-item .role{font-weight:600; font-size:13.5px;}
+  .pv-exp-item .meta{font-family:var(--font-mono); font-size:10px; color:#777;}
+  .pv-exp-item p{font-size:12.5px; line-height:1.55; margin:4px 0 0; color:#444;}
+
+  footer{border-top:1px solid var(--line-strong); padding:28px 40px; font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-align:center; letter-spacing:.06em;}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;}
+    .draft-stage{height:340px;}
+    .feature-strip{grid-template-columns:repeat(2,1fr);}
+    .dash-grid{grid-template-columns:1fr 1fr;}
+    .ats-panel, .builder-grid, .role-strip{grid-template-columns:1fr;}
+    .topbar{padding:16px 20px; flex-wrap:wrap; gap:12px;}
+    main{padding:0 20px 80px;}
+    .preview-sheet{position:static;}
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div id="app">
+
+  <nav class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="15.5" stroke="var(--brass-light)" stroke-width="1.2"/>
+        <path d="M17 4 L17 30 M4 17 L30 17" stroke="var(--brass-light)" stroke-width="1"/>
+        <path d="M9 25 L25 9" stroke="var(--brass)" stroke-width="1.6"/>
+      </svg>
+      <div class="brand-text">
+        <span class="name">RESUME/PRO</span>
+        <span class="sub">Drafting Tool · v2.1</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <button class="active" data-view="landing">Overview</button>
+      <button data-view="dashboard">Dashboard</button>
+      <button data-view="builder">Builder</button>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="themeToggle"><span class="dot"></span><span id="themeLabel">Blueprint mode</span></button>
+      <button class="btn btn-primary" style="padding:10px 18px;" data-view="builder">Start Draft</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ============ LANDING ============ -->
+    <section id="view-landing">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">Sheet No. 01 <span class="rule"></span> Career Document Set</div>
+          <h1>Draft a resume<br>the way an <em>architect</em><br>drafts a building.</h1>
+          <p class="lede">Lay down the structure, annotate every measurement, and let the design resolve into a document built to pass both human review and applicant tracking systems — on the first pass.</p>
+          <div class="hero-ctas">
+            <button class="btn btn-primary" data-view="builder">Open Drafting Table</button>
+            <button class="btn btn-ghost" data-view="dashboard">View Dashboard</button>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="n">6</div><div class="l">Template Sets</div></div>
+            <div class="stat"><div class="n">94%</div><div class="l">Avg. ATS Match</div></div>
+            <div class="stat"><div class="n">11</div><div class="l">Data Tables</div></div>
+          </div>
+        </div>
+
+        <div class="draft-stage">
+          <svg class="draft-svg" viewBox="0 0 280 392">
+            <rect class="draft-line" x="4" y="4" width="272" height="384" rx="2"/>
+            <line class="draft-line d2" x1="26" y1="46" x2="180" y2="46"/>
+            <line class="draft-line d2" x1="26" y1="62" x2="120" y2="62"/>
+            <line class="draft-line d3" x1="26" y1="100" x2="254" y2="100"/>
+            <line class="draft-line d3" x1="26" y1="120" x2="254" y2="128"/>
+            <line class="draft-line d3" x1="26" y1="136" x2="220" y2="136"/>
+            <line class="draft-line d3" x1="26" y1="170" x2="254" y2="170"/>
+            <line class="draft-line d3" x1="26" y1="190" x2="254" y2="198"/>
+            <text class="dim-label" x="26" y="360">210 × 297 MM</text>
+            <text class="dim-label d2" x="26" y="374">MARGIN 24PT</text>
+            <text class="dim-label d3" x="150" y="374">ATS-SAFE LAYOUT</text>
+          </svg>
+          <div class="paper-resolve">
+            <div class="pr-name">A. Sharma</div>
+            <div class="pr-title">Full-Stack Engineer</div>
+            <div class="pr-sec">Summary</div>
+            <div class="pr-block w80"></div>
+            <div class="pr-block w60"></div>
+            <div class="pr-sec">Experience</div>
+            <div class="pr-block w40"></div>
+            <div class="pr-block w80"></div>
+            <div class="pr-block w60"></div>
+            <div class="pr-sec">Skills</div>
+            <div class="pr-block w60"></div>
+          </div>
+          <div class="ats-badge">ATS 94</div>
+        </div>
+      </div>
+
+      <div class="feature-strip">
+        <div class="f"><div class="k">01</div><h3>AI drafting</h3><p>Generate summaries, bullets and cover letters grounded in what you've actually done.</p></div>
+        <div class="f"><div class="k">02</div><h3>ATS analysis</h3><p>Score against a real job description. See exactly which keywords are missing.</p></div>
+        <div class="f"><div class="k">03</div><h3>Six templates</h3><p>Modern, Minimal, Corporate, Creative, Professional and strictly ATS-safe.</p></div>
+        <div class="f"><div class="k">04</div><h3>Portfolio, auto-built</h3><p>Your resume data becomes a shareable portfolio site — no extra work.</p></div>
+      </div>
+
+      <div class="section-head"><h2>Built for three roles</h2><span class="idx">Sheet 02 / 03</span></div>
+      <div class="role-strip">
+        <div class="role-card"><span class="tag">Student</span><h4>Draft &amp; apply</h4><p>Build your document set, track ATS performance across versions, apply straight from the job portal.</p></div>
+        <div class="role-card"><span class="tag">Recruiter</span><h4>Search &amp; shortlist</h4><p>Filter candidates by skill and ATS score, save shortlists, reach out without leaving the tool.</p></div>
+        <div class="role-card"><span class="tag">Admin</span><h4>Oversee the set</h4><p>Manage templates, prompts and postings; monitor platform activity from one control sheet.</p></div>
+      </div>
+    </section>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="view-dashboard" hidden>
+      <div class="dash-header">
+        <div>
+          <h1>Your document set</h1>
+          <p>Sheet revision 4 · Last drafted 2 days ago</p>
+        </div>
+        <div class="ring-wrap">
+          <svg width="58" height="58" viewBox="0 0 58 58">
+            <circle cx="29" cy="29" r="24" stroke="var(--line-strong)" stroke-width="4" fill="none"/>
+            <circle cx="29" cy="29" r="24" stroke="var(--brass)" stroke-width="4" fill="none"
+              stroke-dasharray="150.8" stroke-dashoffset="42" stroke-linecap="round" transform="rotate(-90 29 29)"/>
+          </svg>
+          <div><div class="rn">72%</div><div class="rl">Profile Complete</div></div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="sheet crop sec-card" data-view="builder">
+          <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+          <div class="top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="count">03</span></div>
+          <h4>Education</h4><p>Degrees, institutions, GPA on file.</p>
+        </div>
+        <div class="sheet crop sec-card">
+          <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+          <div class="top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg><span class="count">14</span></div>
+          <h4>Skills</h4><p>Technical &amp; soft skills, ranked.</p>
+        </div>
+        <div class="sheet crop sec-card">
+          <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+          <div class="top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg><span class="count">02</span></div>
+          <h4>Experience</h4><p>Internships and roles, dated.</p>
+        </div>
+        <div class="sheet crop sec-card">
+          <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+          <div class="top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="14" rx="1"/><path d="M3 8h18"/></svg><span class="count">05</span></div>
+          <h4>Projects</h4><p>Shipped work, with links.</p>
+        </div>
+        <div class="sheet crop sec-card">
+          <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+          <div class="top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span class="count">04</span></div>
+          <h4>Achievements</h4><p>Awards, recognitions, ranks.</p>
+        </div>
+        <div class="sheet crop sec-card">
+          <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+          <div class="top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg><span class="count">03</span></div>
+          <h4>Languages</h4><p>Spoken &amp; written proficiency.</p>
+        </div>
+      </div>
+
+      <div class="section-head"><h2>ATS analysis</h2><span class="idx">Sheet 03 / 03</span></div>
+      <div class="ats-panel">
+        <div class="sheet">
+          <div class="eyebrow">Match Score<span class="rule"></span></div>
+          <div class="ats-score-box">
+            <div class="ats-big">87</div>
+            <div style="flex:1"><canvas id="atsChart" height="90"></canvas></div>
+          </div>
+          <div class="keyword-tags">
+            <span class="kw match">React</span><span class="kw match">REST APIs</span><span class="kw match">Python</span>
+            <span class="kw miss">Docker</span><span class="kw miss">CI/CD</span><span class="kw miss">PostgreSQL</span>
+          </div>
+        </div>
+        <div class="sheet">
+          <div class="eyebrow">Suggestions<span class="rule"></span></div>
+          <p style="font-size:13px;line-height:1.7;color:var(--text-muted);margin:0;">
+            Add quantified impact to your project bullets · Mention Docker &amp; CI/CD if you've used them ·
+            Move Skills section above Education for this role · Grammar score: 9.2/10.
+          </p>
+        </div>
+      </div>
+
+      <div class="quick-row">
+        <button class="btn btn-primary" data-view="builder">Generate AI Resume</button>
+        <button class="btn btn-ghost">Generate Cover Letter</button>
+        <button class="btn btn-ghost">Download PDF</button>
+      </div>
+    </section>
+
+    <!-- ============ BUILDER ============ -->
+    <section id="view-builder" hidden>
+      <div class="section-head" style="margin-top:44px;">
+        <h2>Drafting table</h2>
+        <span class="idx">Live preview →</span>
+      </div>
+
+      <div class="builder-grid">
+        <div class="sheet form-panel">
+          <div class="row-2">
+            <div class="field"><label>Full name</label><input id="f-name" value="Asha Sharma"></div>
+            <div class="field"><label>Target title</label><input id="f-title" value="Full-Stack Engineer"></div>
+          </div>
+          <div class="field">
+            <label>Career summary</label>
+            <textarea id="f-summary" rows="3" placeholder="A short professional summary...">Final-year CS student who has shipped three production side-projects and interned on a 4-person backend team.</textarea>
+            <button class="ai-btn" id="aiSummaryBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.8 5.3L19 9l-5.2 1.7L12 16l-1.8-5.3L5 9l5.2-1.7z"/></svg>
+              Draft with AI
+            </button>
+          </div>
+          <div class="field"><label>Skills (comma separated)</label><input id="f-skills" value="React, Python, Django, REST APIs, PostgreSQL, Tailwind"></div>
+          <div class="field">
+            <label>Experience — role @ company</label>
+            <input id="f-exp-role" value="Backend Intern @ Northlane Labs" style="margin-bottom:8px;">
+            <textarea id="f-exp-desc" rows="2" placeholder="What did you do?">Built two internal REST APIs used by 30+ engineers; cut report generation time by 40%.</textarea>
+            <button class="ai-btn" id="aiExpBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.8 5.3L19 9l-5.2 1.7L12 16l-1.8-5.3L5 9l5.2-1.7z"/></svg>
+              Sharpen bullet with AI
+            </button>
+          </div>
+          <div id="aiStatus" style="font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted); min-height:16px;"></div>
+        </div>
+
+        <div>
+          <div class="template-tabs">
+            <button class="active" data-tpl="modern">Modern</button>
+            <button data-tpl="minimal">Minimal</button>
+            <button data-tpl="ats">ATS-Friendly</button>
+          </div>
+          <div class="preview-sheet tpl-modern" id="previewSheet">
+            <p class="pv-name" id="pv-name">Asha Sharma</p>
+            <p class="pv-title" id="pv-title">Full-Stack Engineer</p>
+            <p class="pv-summary" id="pv-summary">Final-year CS student who has shipped three production side-projects and interned on a 4-person backend team.</p>
+            <div class="pv-sec-title">Skills</div>
+            <div class="pv-skills" id="pv-skills"></div>
+            <div class="pv-sec-title">Experience</div>
+            <div class="pv-exp-item">
+              <div class="role" id="pv-exp-role">Backend Intern @ Northlane Labs</div>
+              <div class="meta">2024 — Present</div>
+              <p id="pv-exp-desc">Built two internal REST APIs used by 30+ engineers; cut report generation time by 40%.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>RESUME/PRO — DRAFTING TOOL · ALL SHEETS SAVED LOCALLY · PROTOTYPE BUILD</footer>
+</div>
+
+<script>
+  // ---------- View switching ----------
+  const views = ['landing','dashboard','builder'];
+  function showView(v){
+    views.forEach(name=>{
+      document.getElementById('view-'+name).hidden = name!==v;
+    });
+    document.querySelectorAll('.nav-links button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.view===v);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-view]').forEach(el=>{
+    el.addEventListener('click', ()=> showView(el.dataset.view));
+  });
+
+  // ---------- Theme toggle ----------
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeLabel = document.getElementById('themeLabel');
+  themeToggle.addEventListener('click', ()=>{
+    const next = root.getAttribute('data-theme')==='blueprint' ? 'paper' : 'blueprint';
+    root.setAttribute('data-theme', next);
+    themeLabel.textContent = next==='blueprint' ? 'Blueprint mode' : 'Paper mode';
+  });
+
+  // ---------- ATS chart ----------
+  const ctx = document.getElementById('atsChart');
+  if(ctx){
+    new Chart(ctx, {
+      type:'line',
+      data:{
+        labels:['v1','v2','v3','v4','v5'],
+        datasets:[{
+          data:[61,68,74,79,87],
+          borderColor:'#E0AE5A',
+          backgroundColor:'rgba(224,174,90,0.12)',
+          fill:true, tension:.35, pointRadius:3, pointBackgroundColor:'#E0AE5A'
+        }]
+      },
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:'#8FA3C4', font:{family:'IBM Plex Mono', size:9}}, grid:{display:false}},
+          y:{display:false, min:40, max:100}
+        }
+      }
+    });
+  }
+
+  // ---------- Builder: live preview ----------
+  const fields = ['name','title','summary','skills'];
+  function syncPreview(){
+    document.getElementById('pv-name').textContent = document.getElementById('f-name').value || 'Your Name';
+    document.getElementById('pv-title').textContent = document.getElementById('f-title').value || 'Target Title';
+    document.getElementById('pv-summary').textContent = document.getElementById('f-summary').value;
+    document.getElementById('pv-exp-role').textContent = document.getElementById('f-exp-role').value;
+    document.getElementById('pv-exp-desc').textContent = document.getElementById('f-exp-desc').value;
+    const skillsWrap = document.getElementById('pv-skills');
+    skillsWrap.innerHTML = '';
+    document.getElementById('f-skills').value.split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{
+      const el = document.createElement('span'); el.textContent = s; skillsWrap.appendChild(el);
+    });
+  }
+  ['f-name','f-title','f-summary','f-skills','f-exp-role','f-exp-desc'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', syncPreview);
+  });
+  syncPreview();
+
+  // ---------- Template switch ----------
+  document.querySelectorAll('.template-tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.template-tabs button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const sheet = document.getElementById('previewSheet');
+      sheet.classList.remove('tpl-modern','tpl-minimal','tpl-ats');
+      sheet.classList.add('tpl-'+btn.dataset.tpl);
+    });
+  });
+
+  // ---------- AI drafting (real Claude API call) ----------
+  async function callClaude(prompt){
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        messages:[{role:'user', content: prompt}]
+      })
+    });
+    const data = await res.json();
+    const textBlock = (data.content || []).find(b=>b.type==='text');
+    return textBlock ? textBlock.text.trim() : '';
+  }
+
+  const statusEl = document.getElementById('aiStatus');
+  function setStatus(msg){ statusEl.textContent = msg; }
+
+  document.getElementById('aiSummaryBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('aiSummaryBtn');
+    btn.disabled = true; setStatus('Drafting summary…');
+    try{
+      const title = document.getElementById('f-title').value;
+      const skills = document.getElementById('f-skills').value;
+      const current = document.getElementById('f-summary').value;
+      const prompt = `Write a punchy 2-sentence professional resume summary (max 40 words, no preamble, no quotes) for a candidate targeting "${title}" with skills: ${skills}. Base it on this rough note: "${current}". Return only the summary text.`;
+      const out = await callClaude(prompt);
+      if(out){ document.getElementById('f-summary').value = out; syncPreview(); setStatus('Summary drafted.'); }
+      else setStatus('No response — try again.');
+    }catch(e){ setStatus('AI request failed: '+e.message); }
+    finally{ btn.disabled = false; }
+  });
+
+  document.getElementById('aiExpBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('aiExpBtn');
+    btn.disabled = true; setStatus('Sharpening bullet…');
+    try{
+      const role = document.getElementById('f-exp-role').value;
+      const current = document.getElementById('f-exp-desc').value;
+      const prompt = `Rewrite this resume bullet for "${role}" to start with a strong action verb, include a metric if plausible, and stay under 28 words. No preamble, no quotes, return only the rewritten bullet. Original: "${current}"`;
+      const out = await callClaude(prompt);
+      if(out){ document.getElementById('f-exp-desc').value = out; syncPreview(); setStatus('Bullet sharpened.'); }
+      else setStatus('No response — try again.');
+    }catch(e){ setStatus('AI request failed: '+e.message); }
+    finally{ btn.disabled = false; }
+  });
+</script>
+</body>
+</html>
